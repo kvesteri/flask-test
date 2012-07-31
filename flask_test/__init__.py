@@ -20,6 +20,62 @@ class TestCase(object):
         self._ctx = self.app.test_request_context()
         self._ctx.push()
 
+    @property
+    def db(self):
+        return self.app.extensions['sqlalchemy'].db
+
+    def teardown_method(self, method):
+        self.client = None
+
+        try:
+            self.db.session.remove()
+            self._delete_tables()
+            self.db.session.close_all()
+            self.db.engine.dispose()
+            del self.app.extensions['sqlalchemy']
+            self._clear_sqlalchemy_event_listeners()
+        except KeyError:
+            pass
+
+        self._ctx.pop()
+        self.app = None
+        self.xhr_client = None
+        self._ctx = None
+
+        for key in self.__dict__.keys():
+            setattr(self, key, None)
+
+    def _delete_tables(self):
+        tables = reversed(self.db.metadata.sorted_tables)
+        for table in tables:
+            self.db.session.execute(table.delete())
+        self.db.session.commit()
+
+    def _truncate_tables(self):
+        from sqlalchemy.ext.compiler import compiles
+        from sqlalchemy.sql.expression import Executable, ClauseElement
+
+        class TruncateTable(Executable, ClauseElement):
+            def __init__(self, *tables):
+                self.tables = tables
+
+        @compiles(TruncateTable)
+        def visit_truncate_table(element, compiler, **kwargs):
+            return "TRUNCATE TABLE %s" % ', '.join(
+                compiler.process(table, asfrom=True)
+                for table in element.tables
+            )
+
+        tables = self.db.metadata.tables.values()
+        self.db.session.execute(TruncateTable(*tables))
+        self.db.session.commit()
+
+    def _clear_sqlalchemy_event_listeners(self):
+        from sqlalchemy import event
+        for key, items in event._registrars.items():
+            for item in items:
+                item.dispatch._clear()
+
     def assert_template_used(self, name):
         """
         Checks if a given template is used in the request.
@@ -152,7 +208,7 @@ class TestCase(object):
 
 
 class JsonTestCase(TestCase):
-    def create_app(self):
+    def after_create_app(self):
         """
         Create your Flask app here, with any configuration you need.
 
