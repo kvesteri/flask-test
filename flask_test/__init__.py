@@ -254,7 +254,11 @@ class JsonTestCase(TestCase):
             data=data
         )
         if response.status_code == 201:
-            setattr(self.current, resource, Struct(response.json['data']))
+            data = response.json['data']
+            if isinstance(data, dict):
+                setattr(self.current, resource, Struct(data))
+            else:
+                setattr(self.current, resource, data)
         else:
             setattr(self.current, resource, None)
         return response
@@ -342,7 +346,7 @@ class DeleteTestMixin(object):
         self.assert204(response)
 
     def test_delete_returns_404_for_unknown_object(self):
-        response = self.delete(**{self.identifier: 123123})
+        response = self.delete(tag_id=123123)
         self.assert404(response)
 
 
