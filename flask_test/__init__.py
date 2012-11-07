@@ -25,6 +25,15 @@ class TestCase(object):
         self.xhr_client = xhr_test_client(self, self.app.test_client())
         self._ctx = self.app.test_request_context()
         self._ctx.push()
+        self.make_json_aware(self.app)
+
+    def make_json_aware(self, app):
+        """
+        Extends the normal app by patching the response class to
+        include a `json` attribute for quickly getting the response body as
+        parsed as JSON.
+        """
+        self.app.response_class = _make_test_response(self.app.response_class)
 
     @property
     def db(self):
@@ -220,14 +229,6 @@ class JsonTestCase(TestCase):
     def setup_method(self, method):
         TestCase.setup_method(self, method)
         self.current = Struct()
-
-    def after_create_app(self, app):
-        """
-        Extends the normal meth:`create_app` by patching the response class to
-        include a `json` attribute for quickly getting the response body as
-        parsed as JSON.
-        """
-        self.app.response_class = _make_test_response(self.app.response_class)
 
     def before_request(self):
         pass
