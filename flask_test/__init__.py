@@ -21,19 +21,11 @@ class TestCase(object):
     def setup_method(self, method):
         self.app = self.create_app()
         self.after_create_app(self.app)
+        self.app.response_class = _make_test_response(self.app.response_class)
         self.client = self.app.test_client()
         self.xhr_client = xhr_test_client(self, self.app.test_client())
         self._ctx = self.app.test_request_context()
         self._ctx.push()
-        self.make_json_aware(self.app)
-
-    def make_json_aware(self, app):
-        """
-        Extends the normal app by patching the response class to
-        include a `json` attribute for quickly getting the response body as
-        parsed as JSON.
-        """
-        self.app.response_class = _make_test_response(self.app.response_class)
 
     @property
     def db(self):
@@ -397,6 +389,11 @@ def xhr_test_client(test_case, client):
 
 
 def _make_test_response(response_class):
+    """
+    Extends the normal app response by patching the response class to
+    include a `json` attribute for quickly getting the response body as
+    parsed as JSON.
+    """
     class TestResponse(response_class, JsonResponseMixin):
         pass
 
