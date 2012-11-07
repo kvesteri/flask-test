@@ -7,6 +7,8 @@ class ContextVariableDoesNotExist(Exception):
 
 
 class TestCase(object):
+    method_teardown_data = True
+
     def create_app(self):
         """
         Create your Flask app here, with any configuration you need.
@@ -42,13 +44,14 @@ class TestCase(object):
     def teardown_sqlalchemy(self):
         if hasattr(self, 'db'):
             self.db.session.remove()
-            self._delete_tables()
+            if self.method_teardown_data:
+                self._delete_table_data()
             self.db.session.close_all()
             self.db.engine.dispose()
             del self.app.extensions['sqlalchemy']
             self._clear_sqlalchemy_event_listeners()
 
-    def _delete_tables(self):
+    def _delete_table_data(self):
         """
         Deletes the data in all database tables
         """
