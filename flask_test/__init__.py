@@ -18,9 +18,9 @@ class TestCase(object):
 
     def setup_method(self, method):
         self.app = self.create_app()
-        self.after_create_app()
+        self.after_create_app(self.app)
         self.client = self.app.test_client()
-        self.xhr_client = xhr_test_client(self.app.test_client())
+        self.xhr_client = xhr_test_client(self, self.app.test_client())
         self._ctx = self.app.test_request_context()
         self._ctx.push()
 
@@ -138,7 +138,7 @@ class TestCase(object):
         :param response: Flask response
         :param status_code: response status code (e.g. 200)
         """
-        assert response.status_code == status_code
+        assert response.status_code == status_code, response.data
 
     def assert200(self, response):
         """
@@ -218,29 +218,20 @@ class JsonTestCase(TestCase):
         TestCase.setup_method(self, method)
         self.current = Struct()
 
-    def after_create_app(self):
+    def after_create_app(self, app):
         """
         Extends the normal meth:`create_app` by patching the response class to
         include a `json` attribute for quickly getting the response body as
         parsed as JSON.
         """
         self.app.response_class = _make_test_response(self.app.response_class)
-        return self.app
 
     def before_request(self):
         pass
 
-    def _init_args(self, resource, **kwargs):
+    def put(self, resource=None, data={}, **kwargs):
         if resource is None:
             resource = self.resource
-
-        if self.identifier not in kwargs:
-            kwargs[self.identifier] = getattr(self.current, resource).id
-        return resource, kwargs
-
-    def put(self, resource=None, data={}, **kwargs):
-        resource, kwargs = self._init_args(resource, **kwargs)
-
         return self.xhr_client.put(
             url_for(resource, _method='PUT', **kwargs),
             data=data
@@ -264,7 +255,8 @@ class JsonTestCase(TestCase):
         return response
 
     def delete(self, resource=None, **kwargs):
-        resource, kwargs = self._init_args(resource, **kwargs)
+        if resource is None:
+            resource = self.resource
         return self.xhr_client.delete(
             url_for(
                 resource,
@@ -382,12 +374,12 @@ class JsonResponseMixin(object):
         return json.loads(self.data)
 
 
-def xhr_test_client(client):
+def xhr_test_client(test_case, client):
     """Decorates regular test client to make XMLHttpRequests with JSON data."""
 
     original_open = client.open
 
-    def open(self, *args, **kwargs):
+    def decorated_open(self, *args, **kwargs):
         if 'data' in kwargs:
             kwargs['data'] = json.dumps(kwargs['data'])
         kwargs['content_type'] = 'application/json'
@@ -396,7 +388,7 @@ def xhr_test_client(client):
         ]
         return original_open(self, *args, **kwargs)
 
-    client.open = open
+    client.open = decorated_open
     return client
 
 
