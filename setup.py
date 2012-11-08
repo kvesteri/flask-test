@@ -32,7 +32,8 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'Flask>=0.7'
+        'Flask>=0.7',
+        'wtforms_test>=0.1'
     ],
     cmdclass={'test': PyTest},
     classifiers=[

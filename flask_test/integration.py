@@ -4,7 +4,6 @@ from flexmock import flexmock
 from flask import url_for
 from flask.ext.login import user_unauthorized
 
-
 from .view import ViewMixin
 from .database import DatabaseMixin
 from .base import BaseTestCase

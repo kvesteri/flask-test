@@ -14,7 +14,7 @@ class BaseTestCase(object):
 
     def setup_method(self, method):
         self.app = self.create_app()
-        self.after_create_app(self)
+        self.after_create_app()
         self.app.response_class = _make_test_response(self.app.response_class)
         self._app_context = self.app.app_context()
         self._app_context.push()
