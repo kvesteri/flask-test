@@ -1,14 +1,39 @@
 from flask import json, template_rendered, url_for
-from wtforms_test import FormTestCase as _FormTestCase
-from .base import BaseTestCase
+from .base import BaseTestCase, ApplicationSetup
 
 
 class ContextVariableDoesNotExist(Exception):
     pass
 
 
-class FormTestCase(BaseTestCase, _FormTestCase):
-    pass
+class ViewSetup(ApplicationSetup):
+    @classmethod
+    def setup(cls, obj, app, *args, **kwargs):
+        ApplicationSetup.setup(obj, app, *args, **kwargs)
+        cls.setup_view(obj, app)
+
+    @classmethod
+    def setup_view(cls, obj, app):
+        obj.client = app.test_client()
+        obj.xhr_client = xhr_test_client(obj, app.test_client())
+        obj._ctx = app.test_request_context()
+        obj._ctx.push()
+
+        obj.templates = []
+        template_rendered.connect(obj._add_template)
+
+    @classmethod
+    def teardown_view(cls, obj):
+        obj.client = None
+        obj.xhr_client = None
+        obj._ctx.pop()
+        obj._ctx = None
+        template_rendered.disconnect(obj._add_template)
+
+    @classmethod
+    def teardown(cls, obj):
+        cls.teardown_view(obj)
+        ApplicationSetup.teardown(obj)
 
 
 class ViewMixin(object):
@@ -18,22 +43,6 @@ class ViewMixin(object):
 
     def get_page(self):
         return self.client.get(url_for(self.view))
-
-    def setup_view(self):
-        self.client = self.app.test_client()
-        self.xhr_client = xhr_test_client(self, self.app.test_client())
-        self._ctx = self.app.test_request_context()
-        self._ctx.push()
-
-        self.templates = []
-        template_rendered.connect(self._add_template)
-
-    def teardown_view(self):
-        self.client = None
-        self.xhr_client = None
-        self._ctx.pop()
-        self._ctx = None
-        template_rendered.disconnect(self._add_template)
 
     def _add_template(self, app, template, context):
         self.templates.append((template, context))
@@ -163,13 +172,7 @@ class ViewMixin(object):
 
 
 class ViewTestCase(BaseTestCase, ViewMixin):
-    def setup_method(self, method):
-        super(ViewTestCase, self).setup_method(method)
-        self.setup_view()
-
-    def teardown_method(self, method):
-        self.teardown_view()
-        super(ViewTestCase, self).teardown_method(method)
+    setup_delegator = ViewSetup
 
 
 def xhr_test_client(test_case, client):

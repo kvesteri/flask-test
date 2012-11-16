@@ -1,15 +1,15 @@
 from flask import abort, Flask, jsonify, Response, request
 from flask.views import MethodView
-from flask_test import JsonTestCase
+from flask_test import ViewTestCase
 
 
-class BasicTestCase(JsonTestCase):
+class BasicTestCase(ViewTestCase):
     def create_app(self):
         app = Flask(__name__)
         app.debug = True
         app.secret_key = 'very secret'
 
-        tag_view = TagResource.as_view('tag')
+        tag_view = TagAPI.as_view('tag')
         app.add_url_rule('/tags', defaults={'tag_id': None},
                          view_func=tag_view, methods=['GET'])
         app.add_url_rule('/tags', view_func=tag_view, methods=['POST'])
@@ -19,8 +19,8 @@ class BasicTestCase(JsonTestCase):
         return app
 
 
-class TagResource(MethodView):
-    tags = {}
+class TagAPI(MethodView):
+    tags = {1: {}}
     tag_counter = 1
 
     def fetch_tag(self, tag_id):
