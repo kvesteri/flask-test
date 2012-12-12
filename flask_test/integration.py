@@ -47,6 +47,9 @@ class IntegrationMixin(DatabaseMixin, ViewMixin):
             with client.session_transaction() as s:
                 s['user_id'] = None
 
+    def requires_login(self):
+        return requires_login()
+
 
 class IntegrationTestCase(BaseTestCase, IntegrationMixin):
     setup_delegator = IntegrationSetup

@@ -5,4 +5,4 @@ pytest>=2.2.4
 SQLAlchemy==0.7.9
 Werkzeug==0.8.3
 WTForms==1.0.2
--e git+https://github.com/kvesteri/wtforms-test.git@52a0523f6078d5b5493d27ef9b219d3f7a2ce80e#egg=WTForms-Test-dev
+WTForms-Test==0.1
