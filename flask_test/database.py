@@ -36,13 +36,14 @@ class DatabaseSetup(ApplicationSetup):
 
     @classmethod
     def teardown_database(cls, obj):
-        db = obj.app.extensions['sqlalchemy'].db
-        db.session.remove()
-        if obj.teardown_delete_data:
-            cls.delete_tables(db)
-        db.session.close_all()
-        db.engine.dispose()
-        cls.clear_sqlalchemy_event_listeners()
+        if 'sqlalchemy' in obj.app.extensions:
+            db = obj.app.extensions['sqlalchemy'].db
+            db.session.remove()
+            if obj.teardown_delete_data:
+                cls.delete_tables(db)
+            db.session.close_all()
+            db.engine.dispose()
+            cls.clear_sqlalchemy_event_listeners()
 
     @classmethod
     def clear_sqlalchemy_event_listeners(cls):

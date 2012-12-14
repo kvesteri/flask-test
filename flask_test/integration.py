@@ -1,16 +1,15 @@
 from contextlib import contextmanager
 from flask.ext.login import user_unauthorized
 
-from .view import ViewMixin
-from .database import DatabaseMixin
-from .base import BaseTestCase, ApplicationSetup
+from .view import ViewMixin, ViewSetup
+from .database import DatabaseMixin, DatabaseSetup
+from .base import BaseTestCase
 
 
-class IntegrationSetup(ApplicationSetup):
+class IntegrationSetup(DatabaseSetup, ViewSetup):
     @classmethod
     def setup(cls, obj, app):
         super(IntegrationSetup, cls).setup(obj, app)
-        cls.setup_database(obj, app)
         cls.setup_view(obj, app)
 
     @classmethod
