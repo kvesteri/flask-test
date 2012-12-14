@@ -30,17 +30,6 @@ class DatabaseSetup(ApplicationSetup):
         db.session.commit()
 
     @classmethod
-    def setup(cls, obj, app, *args, **kwargs):
-        ApplicationSetup.setup(obj, app, *args, **kwargs)
-        cls.setup_database(obj, app)
-
-    @classmethod
-    def setup_database(cls, obj, app):
-        db = app.extensions['sqlalchemy'].db
-        if obj.setup_tables:
-            db.create_all()
-
-    @classmethod
     def teardown(cls, obj):
         cls.teardown_database(obj)
         ApplicationSetup.teardown(obj)
@@ -49,7 +38,7 @@ class DatabaseSetup(ApplicationSetup):
     def teardown_database(cls, obj):
         db = obj.app.extensions['sqlalchemy'].db
         db.session.remove()
-        if obj.setup_tables:
+        if obj.teardown_delete_data:
             cls.delete_tables(db)
         db.session.close_all()
         db.engine.dispose()
@@ -63,7 +52,7 @@ class DatabaseSetup(ApplicationSetup):
 
 
 class DatabaseMixin(object):
-    setup_tables = True
+    teardown_delete_data = True
 
     @property
     def db(self):
