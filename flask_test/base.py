@@ -1,4 +1,4 @@
-from flask import Flask, json
+from flask import json
 from werkzeug import cached_property
 
 
@@ -21,11 +21,12 @@ class BaseTestCase(object):
 
     setup_delegator = ApplicationSetup
 
+    @classmethod
     def create_app(self):
         """
-        Create your Flask app here, with any configuration you need.
+        Create your Flask app here
         """
-        return Flask('test')
+        raise NotImplementedError
 
     def after_create_app(self):
         pass
