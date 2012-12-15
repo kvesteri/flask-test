@@ -8,7 +8,7 @@ class ContextVariableDoesNotExist(Exception):
 
 class ViewSetup(ApplicationSetup):
     def setup(self, obj, app, *args, **kwargs):
-        ApplicationSetup.setup(obj, app, *args, **kwargs)
+        super(ViewSetup, self).setup(obj, app, *args, **kwargs)
         self.setup_view(obj, app)
 
     def setup_view(self, obj, app):
@@ -29,14 +29,13 @@ class ViewSetup(ApplicationSetup):
 
     def teardown(self, obj):
         self.teardown_view(obj)
-        ApplicationSetup.teardown(obj)
+        super(ViewSetup, self).teardown(obj)
 
 
 class ViewMixin(object):
     template = None
     view = None
     url = None
-    setup_delegator = ViewSetup()
 
     def get_page(self):
         return self.client.get(url_for(self.view))
@@ -169,7 +168,7 @@ class ViewMixin(object):
 
 
 class ViewTestCase(BaseTestCase, ViewMixin):
-    pass
+    setup_delegator = ViewSetup()
 
 
 def xhr_test_client(test_case, client):

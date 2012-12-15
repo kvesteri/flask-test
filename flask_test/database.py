@@ -29,7 +29,7 @@ class DatabaseSetup(ApplicationSetup):
 
     def teardown(self, obj):
         self.teardown_database(obj)
-        ApplicationSetup.teardown(obj)
+        super(DatabaseSetup, self).teardown(obj)
 
     def teardown_database(self, obj):
         if 'sqlalchemy' in obj.app.extensions:
@@ -50,12 +50,10 @@ class DatabaseSetup(ApplicationSetup):
 class DatabaseMixin(object):
     teardown_delete_data = True
 
-    setup_delegator = DatabaseSetup()
-
     @property
     def db(self):
         return self.app.extensions['sqlalchemy'].db
 
 
 class DatabaseTestCase(BaseTestCase, DatabaseMixin):
-    pass
+    setup_delegator = DatabaseSetup()

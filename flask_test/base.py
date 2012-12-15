@@ -3,15 +3,21 @@ from werkzeug import cached_property
 
 
 class ApplicationSetup(object):
-    def setup(self, obj, app, *args, **kwargs):
+    def setup_app(self, obj, app, *args, **kwargs):
         obj.app = app
         obj.app.response_class = _make_test_response(obj.app.response_class)
         obj._app_context = obj.app.app_context()
         obj._app_context.push()
 
-    def teardown(self, obj):
+    def teardown_app(self, obj):
         obj._app_context.pop()
         obj.app = None
+
+    def setup(self, obj, app, *args, **kwargs):
+        self.setup_app(obj, app, *args, **kwargs)
+
+    def teardown(self, obj):
+        self.teardown_app(obj)
 
 
 class BaseTestCase(object):

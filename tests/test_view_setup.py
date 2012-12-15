@@ -22,5 +22,7 @@ class TestViewSetup(ViewTestCase):
         return app
 
     def test_initializes_xhr_client(self):
-        response = self.xhr_client.get('/tags/1')
-        self.assert200(response)
+        assert self.xhr_client
+
+    def test_initializes_client(self):
+        assert self.client
