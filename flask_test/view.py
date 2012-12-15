@@ -18,22 +18,6 @@ class ViewSetup(object):
         obj._ctx = None
         template_rendered.disconnect(obj._add_template)
 
-# class StaticPageMixin(object):
-#     def test_url(self):
-#         assert url_for(self.view) == self.url
-
-#     def test_returns_200(self):
-#         response = self.get_page()
-#         assert response.status_code == 200
-
-#     def test_uses_correct_template(self):
-#         self.get_page()
-#         self.assert_template_used(self.template)
-
-
-# class StaticPageTestCase(BaseTestCase, StaticPageMixin):
-#     pass
-
 
 def xhr_test_client(test_case, client):
     """Decorates regular test client to make XMLHttpRequests with JSON data."""

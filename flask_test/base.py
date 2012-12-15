@@ -29,7 +29,7 @@ class TestCase(object):
     view = None
     url = None
     setup_level = 'method'
-    setup_delegators = [ApplicationSetup(), ViewSetup(), DatabaseSetup()]
+    setup_delegators = [ApplicationSetup(), DatabaseSetup(), ViewSetup()]
 
     @property
     def db(self):
@@ -93,8 +93,9 @@ class TestCase(object):
     def setup_class(cls):
         if cls.setup_level == 'class':
             cls.before_class_setup()
+            app = cls.create_app()
             for setup_delegator in cls.setup_delegators:
-                setup_delegator.setup(cls, cls.create_app())
+                setup_delegator.setup(cls, app)
             cls.after_class_setup()
 
     @classmethod
@@ -108,8 +109,9 @@ class TestCase(object):
     def setup_method(self, method):
         if self.setup_level == 'method':
             self.before_method_setup(method)
+            app = self.create_app()
             for setup_delegator in self.setup_delegators:
-                setup_delegator.setup(self, self.create_app())
+                setup_delegator.setup(self, app)
             self.after_method_setup(method)
 
     def teardown_method(self, method):

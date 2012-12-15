@@ -26,3 +26,7 @@ class TestViewSetup(TestCase):
 
     def test_initializes_client(self):
         assert self.client
+
+    def test_wraps_request_objects(self):
+        response = self.xhr_client.get('/tags/1')
+        response.json  # should have json attribute
