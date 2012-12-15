@@ -7,19 +7,19 @@ from .base import BaseTestCase
 
 
 class IntegrationSetup(DatabaseSetup, ViewSetup):
-    @classmethod
-    def setup(cls, obj, app):
-        super(IntegrationSetup, cls).setup(obj, app)
-        cls.setup_view(obj, app)
+    def setup(self, obj, app):
+        super(IntegrationSetup, self).setup(obj, app)
+        self.setup_view(obj, app)
 
-    @classmethod
-    def teardown(cls, obj):
-        cls.teardown_database(obj)
-        cls.teardown_view(obj)
-        super(IntegrationSetup, cls).teardown(obj)
+    def teardown(self, obj):
+        self.teardown_database(obj)
+        self.teardown_view(obj)
+        super(IntegrationSetup, self).teardown(obj)
 
 
 class IntegrationMixin(DatabaseMixin, ViewMixin):
+    setup_delegator = IntegrationSetup()
+
     def create_or_get_user(self):
         """
         Create a user and save it to database.
@@ -51,7 +51,7 @@ class IntegrationMixin(DatabaseMixin, ViewMixin):
 
 
 class IntegrationTestCase(BaseTestCase, IntegrationMixin):
-    setup_delegator = IntegrationSetup
+    pass
 
 
 @contextmanager

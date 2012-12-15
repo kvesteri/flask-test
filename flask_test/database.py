@@ -5,15 +5,13 @@ from .base import BaseTestCase, ApplicationSetup
 
 
 class DatabaseSetup(ApplicationSetup):
-    @classmethod
-    def delete_tables(cls, db):
+    def delete_tables(self, db):
         tables = reversed(db.metadata.sorted_tables)
         for table in tables:
             db.session.execute(table.delete())
         db.session.commit()
 
-    @classmethod
-    def truncate_tables(cls, db):
+    def truncate_tables(self, db):
         class TruncateTable(Executable, ClauseElement):
             def __init__(self, *tables):
                 self.tables = tables
@@ -29,24 +27,21 @@ class DatabaseSetup(ApplicationSetup):
         db.session.execute(TruncateTable(*tables))
         db.session.commit()
 
-    @classmethod
-    def teardown(cls, obj):
-        cls.teardown_database(obj)
+    def teardown(self, obj):
+        self.teardown_database(obj)
         ApplicationSetup.teardown(obj)
 
-    @classmethod
-    def teardown_database(cls, obj):
+    def teardown_database(self, obj):
         if 'sqlalchemy' in obj.app.extensions:
             db = obj.app.extensions['sqlalchemy'].db
             db.session.remove()
             if obj.teardown_delete_data:
-                cls.delete_tables(db)
+                self.delete_tables(db)
             db.session.close_all()
             db.engine.dispose()
-            cls.clear_sqlalchemy_event_listeners()
+            self.clear_sqlalchemy_event_listeners()
 
-    @classmethod
-    def clear_sqlalchemy_event_listeners(cls):
+    def clear_sqlalchemy_event_listeners(self):
         for key, items in event._registrars.items():
             for item in items:
                 item.dispatch._clear()
@@ -55,10 +50,12 @@ class DatabaseSetup(ApplicationSetup):
 class DatabaseMixin(object):
     teardown_delete_data = True
 
+    setup_delegator = DatabaseSetup()
+
     @property
     def db(self):
         return self.app.extensions['sqlalchemy'].db
 
 
 class DatabaseTestCase(BaseTestCase, DatabaseMixin):
-    setup_delegator = DatabaseSetup
+    pass

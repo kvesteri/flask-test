@@ -7,13 +7,11 @@ class ContextVariableDoesNotExist(Exception):
 
 
 class ViewSetup(ApplicationSetup):
-    @classmethod
-    def setup(cls, obj, app, *args, **kwargs):
+    def setup(self, obj, app, *args, **kwargs):
         ApplicationSetup.setup(obj, app, *args, **kwargs)
-        cls.setup_view(obj, app)
+        self.setup_view(obj, app)
 
-    @classmethod
-    def setup_view(cls, obj, app):
+    def setup_view(self, obj, app):
         obj.client = app.test_client()
         obj.xhr_client = xhr_test_client(obj, app.test_client())
         obj._ctx = app.test_request_context()
@@ -22,17 +20,15 @@ class ViewSetup(ApplicationSetup):
         obj.templates = []
         template_rendered.connect(obj._add_template)
 
-    @classmethod
-    def teardown_view(cls, obj):
+    def teardown_view(self, obj):
         obj.client = None
         obj.xhr_client = None
         obj._ctx.pop()
         obj._ctx = None
         template_rendered.disconnect(obj._add_template)
 
-    @classmethod
-    def teardown(cls, obj):
-        cls.teardown_view(obj)
+    def teardown(self, obj):
+        self.teardown_view(obj)
         ApplicationSetup.teardown(obj)
 
 
@@ -40,6 +36,7 @@ class ViewMixin(object):
     template = None
     view = None
     url = None
+    setup_delegator = ViewSetup()
 
     def get_page(self):
         return self.client.get(url_for(self.view))
@@ -172,7 +169,7 @@ class ViewMixin(object):
 
 
 class ViewTestCase(BaseTestCase, ViewMixin):
-    setup_delegator = ViewSetup
+    pass
 
 
 def xhr_test_client(test_case, client):
