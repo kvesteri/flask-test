@@ -1,5 +1,7 @@
 from .base import BaseTestCase, JsonResponseMixin
-from .integration import IntegrationTestCase, IntegrationSetup, requires_login
+from .integration import (
+    IntegrationTestCase, IntegrationMixin, IntegrationSetup, requires_login
+)
 from .database import (
     DatabaseSetup, DatabaseMixin, DatabaseTestCase
 )
@@ -13,6 +15,7 @@ __all__ = (
     DatabaseMixin,
     DatabaseSetup,
     DatabaseTestCase,
+    IntegrationMixin,
     IntegrationSetup,
     IntegrationTestCase,
     JsonResponseMixin,
