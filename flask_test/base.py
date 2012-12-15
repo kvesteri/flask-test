@@ -114,10 +114,10 @@ class TestCase(object):
 
     def teardown_method(self, method):
         if self.setup_level == 'method':
-            self.before_teardown(method)
+            self.before_method_teardown(method)
             for setup_delegator in reversed(self.setup_delegators):
                 setup_delegator.teardown(self)
-            self.after_teardown(method)
+            self.after_method_teardown(method)
 
     def create_or_get_user(self):
         """
