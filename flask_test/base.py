@@ -44,6 +44,18 @@ class BaseTestCase(object):
         pass
 
     @classmethod
+    def before_teardown(self, method=None):
+        """Simple template method that is invoked before teardown_class or
+        teardown_method are called."""
+        pass
+
+    @classmethod
+    def after_teardown(self, method=None):
+        """Simple template method that is invoked after teardown_class or
+        teardown_method are called."""
+        pass
+
+    @classmethod
     def setup_class(cls):
         if cls.setup_level == 'class':
             cls.before_setup()
