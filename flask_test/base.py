@@ -32,22 +32,40 @@ class BaseTestCase(object):
         pass
 
     @classmethod
+    def before_setup(self, method=None):
+        """Simple template method that is invoked before setup_class or
+        setup_method are called."""
+
+    @classmethod
+    def after_setup(self, method=None):
+        """Simple template method that is invoked after setup_class or
+        setup_method are called."""
+
+    @classmethod
     def setup_class(cls):
         if cls.setup_level == 'class':
+            cls.before_setup()
             cls.setup_delegator.setup(cls, cls.create_app())
+            cls.after_setup()
 
     @classmethod
     def teardown_class(cls):
         if cls.setup_level == 'class':
+            cls.before_teardown()
             cls.setup_delegator.teardown(cls)
+            cls.after_teardown()
 
     def setup_method(self, method):
         if self.setup_level == 'method':
+            self.before_setup(method)
             self.setup_delegator.setup(self, self.create_app())
+            self.after_setup(method)
 
     def teardown_method(self, method):
         if self.setup_level == 'method':
+            self.before_teardown()
             self.setup_delegator.teardown(self)
+            self.after_teardown()
 
 
 class JsonResponseMixin(object):
