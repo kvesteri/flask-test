@@ -1,28 +1,12 @@
-from .base import BaseTestCase, JsonResponseMixin
-from .integration import (
-    IntegrationTestCase, IntegrationMixin, IntegrationSetup, requires_login
-)
-from .database import (
-    DatabaseSetup, DatabaseMixin, DatabaseTestCase
-)
-from .view import (
-    ViewMixin, ViewSetup, ViewTestCase, StaticPageMixin, StaticPageTestCase
-)
+from .base import TestCase, JsonResponseMixin, requires_login
+from database import DatabaseSetup
+from .view import ViewSetup
 
 
 __all__ = (
-    BaseTestCase,
-    DatabaseMixin,
+    TestCase,
     DatabaseSetup,
-    DatabaseTestCase,
-    IntegrationMixin,
-    IntegrationSetup,
-    IntegrationTestCase,
     JsonResponseMixin,
     requires_login,
-    StaticPageMixin,
-    StaticPageTestCase,
-    ViewMixin,
     ViewSetup,
-    ViewTestCase,
 )

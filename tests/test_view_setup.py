@@ -1,9 +1,9 @@
 from flask import Flask
-from flask_test import ViewTestCase
+from flask_test import TestCase
 from tests import TagAPI
 
 
-class TestViewSetup(ViewTestCase):
+class TestViewSetup(TestCase):
     setup_level = 'class'
 
     @classmethod

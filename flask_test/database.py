@@ -1,10 +1,9 @@
 from sqlalchemy import event
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Executable, ClauseElement
-from .base import BaseTestCase, ApplicationSetup
 
 
-class DatabaseSetup(ApplicationSetup):
+class DatabaseSetup(object):
     def delete_tables(self, db):
         tables = reversed(db.metadata.sorted_tables)
         for table in tables:
@@ -27,11 +26,10 @@ class DatabaseSetup(ApplicationSetup):
         db.session.execute(TruncateTable(*tables))
         db.session.commit()
 
-    def teardown(self, obj):
-        self.teardown_database(obj)
-        super(DatabaseSetup, self).teardown(obj)
+    def setup(self, obj, app):
+        pass
 
-    def teardown_database(self, obj):
+    def teardown(self, obj):
         if 'sqlalchemy' in obj.app.extensions:
             db = obj.app.extensions['sqlalchemy'].db
             db.session.remove()
@@ -45,15 +43,3 @@ class DatabaseSetup(ApplicationSetup):
         for key, items in event._registrars.items():
             for item in items:
                 item.dispatch._clear()
-
-
-class DatabaseMixin(object):
-    teardown_delete_data = True
-
-    @property
-    def db(self):
-        return self.app.extensions['sqlalchemy'].db
-
-
-class DatabaseTestCase(BaseTestCase, DatabaseMixin):
-    setup_delegator = DatabaseSetup()

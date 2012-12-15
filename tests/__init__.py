@@ -1,9 +1,9 @@
 from flask import abort, Flask, jsonify, Response, request
 from flask.views import MethodView
-from flask_test import ViewTestCase
+from flask_test import TestCase
 
 
-class BasicTestCase(ViewTestCase):
+class BasicTestCase(TestCase):
     def create_app(self):
         app = Flask(__name__)
         app.debug = True

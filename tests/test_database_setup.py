@@ -1,9 +1,9 @@
 from flask import Flask
-from flask_test import DatabaseTestCase
+from flask_test import TestCase
 from flask.ext.sqlalchemy import SQLAlchemy
 
 
-class DatabaseSetupTestCase(DatabaseTestCase):
+class DatabaseSetupTestCase(TestCase):
     def create_app(self):
         app = Flask(__name__)
         app.debug = True

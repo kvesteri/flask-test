@@ -1,29 +1,39 @@
-from flask import json
+from flask import json, url_for
+from contextlib import contextmanager
+from flask.ext.login import user_unauthorized
+
 from werkzeug import cached_property
+from .view import ViewSetup
+from .database import DatabaseSetup
+
+
+class ContextVariableDoesNotExist(Exception):
+    pass
 
 
 class ApplicationSetup(object):
-    def setup_app(self, obj, app, *args, **kwargs):
+    def setup(self, obj, app, *args, **kwargs):
         obj.app = app
         obj.app.response_class = _make_test_response(obj.app.response_class)
         obj._app_context = obj.app.app_context()
         obj._app_context.push()
 
-    def teardown_app(self, obj):
+    def teardown(self, obj):
         obj._app_context.pop()
         obj.app = None
 
-    def setup(self, obj, app, *args, **kwargs):
-        self.setup_app(obj, app, *args, **kwargs)
 
-    def teardown(self, obj):
-        self.teardown_app(obj)
-
-
-class BaseTestCase(object):
+class TestCase(object):
+    teardown_delete_data = True
+    template = None
+    view = None
+    url = None
     setup_level = 'method'
+    setup_delegators = [ApplicationSetup(), ViewSetup(), DatabaseSetup()]
 
-    setup_delegator = ApplicationSetup()
+    @property
+    def db(self):
+        return self.app.extensions['sqlalchemy'].db
 
     @classmethod
     def create_app(self):
@@ -36,54 +46,236 @@ class BaseTestCase(object):
         pass
 
     @classmethod
-    def before_setup(cls):
-        """Simple template method that is invoked before setup_class or
-        setup_method are called."""
+    def before_class_setup(cls):
+        """Simple template method that is invoked before setup_class is
+        called."""
         pass
 
     @classmethod
-    def after_setup(cls):
-        """Simple template method that is invoked after setup_class or
-        setup_method are called."""
+    def after_class_setup(cls):
+        """Simple template method that is invoked after setup_class is
+        called."""
         pass
 
     @classmethod
-    def before_teardown(cls):
-        """Simple template method that is invoked before teardown_class or
-        teardown_method are called."""
+    def before_class_teardown(cls):
+        """Simple template method that is invoked before teardown_class is
+        called."""
         pass
 
     @classmethod
-    def after_teardown(cls):
-        """Simple template method that is invoked after teardown_class or
-        teardown_method are called."""
+    def after_class_teardown(cls):
+        """Simple template method that is invoked after teardown_class is
+        called."""
+        pass
+
+    def before_method_setup(self, method):
+        """Simple template method that is invoked before setup_method is
+        called."""
+        pass
+
+    def after_method_setup(self, method):
+        """Simple template method that is invoked after setup_method is
+        called."""
+        pass
+
+    def before_method_teardown(self, method):
+        """Simple template method that is invoked before teardown_method is
+        called."""
+        pass
+
+    def after_method_teardown(self, method):
+        """Simple template method that is invoked after teardown_method is
+        called."""
         pass
 
     @classmethod
     def setup_class(cls):
         if cls.setup_level == 'class':
-            cls.before_setup()
-            cls.setup_delegator.setup(cls, cls.create_app())
-            cls.after_setup()
+            cls.before_class_setup()
+            for setup_delegator in cls.setup_delegators:
+                setup_delegator.setup(cls, cls.create_app())
+            cls.after_class_setup()
 
     @classmethod
     def teardown_class(cls):
         if cls.setup_level == 'class':
-            cls.before_teardown()
-            cls.setup_delegator.teardown(cls)
-            cls.after_teardown()
+            cls.before_class_teardown()
+            for setup_delegator in reversed(cls.setup_delegators):
+                setup_delegator.teardown(cls)
+            cls.after_class_teardown()
 
     def setup_method(self, method):
         if self.setup_level == 'method':
-            self.before_setup()
-            self.setup_delegator.setup(self, self.create_app())
-            self.after_setup()
+            self.before_method_setup(method)
+            for setup_delegator in self.setup_delegators:
+                setup_delegator.setup(self, self.create_app())
+            self.after_method_setup(method)
 
     def teardown_method(self, method):
         if self.setup_level == 'method':
-            self.before_teardown()
-            self.setup_delegator.teardown(self)
-            self.after_teardown()
+            self.before_teardown(method)
+            for setup_delegator in reversed(self.setup_delegators):
+                setup_delegator.teardown(self)
+            self.after_teardown(method)
+
+    def create_or_get_user(self):
+        """
+        Create a user and save it to database.
+
+        :returns: the created user
+        """
+        pass
+
+    def login(self, user=None):
+        """
+        Log in the user returned by :meth:`create_user`.
+
+        :returns: the logged in user
+        """
+        if user is None:
+            user = self.create_or_get_user()
+        for client in (self.client, self.xhr_client):
+            with client.session_transaction() as s:
+                s['user_id'] = user.id
+        return user
+
+    def logout(self, user=None):
+        for client in (self.client, self.xhr_client):
+            with client.session_transaction() as s:
+                s['user_id'] = None
+
+    def requires_login(self):
+        return requires_login()
+
+    def get_page(self):
+        return self.client.get(url_for(self.view))
+
+    def _add_template(self, app, template, context):
+        self.templates.append((template, context))
+
+    def assert_template_used(self, name):
+        """
+        Checks if a given template is used in the request.
+
+        :param name: template name
+        """
+        for template, context in self.templates:
+            if template.name == name:
+                return True
+        raise AssertionError("template %s not used" % name)
+
+    def get_context_variable(self, name):
+        """
+        Returns a variable from the context passed to the template.
+
+        Raises a ContextVariableDoesNotExist exception if does
+        not exist in context.
+
+        :param name: name of variable
+        """
+        for template, context in self.templates:
+            if name in context:
+                return context[name]
+        raise ContextVariableDoesNotExist
+
+    def assert_context(self, name, value):
+        """
+        Checks if given name exists in the template context and equals the
+        given value.
+
+        :param name: name of context variable
+        :param value: value to check against
+        """
+
+        try:
+            assert self.get_context_variable(name) == value
+        except ContextVariableDoesNotExist:
+            self.fail("Context variable does not exist: %s" % name)
+
+    def assert_redirects(self, response, location):
+        """
+        Checks if response is an HTTP redirect to the given location.
+
+        :param response: Flask response
+        :param location: relative URL (i.e. without **http://localhost**)
+        """
+        assert response.status_code in (301, 302)
+        assert response.location == "http://localhost" + location
+
+    def assert_status(self, response, status_code):
+        """
+        Helper method to check matching response status.
+
+        :param response: Flask response
+        :param status_code: response status code (e.g. 200)
+        """
+        assert response.status_code == status_code
+
+    def assert200(self, response):
+        """
+        Checks if response status code is 200
+
+        :param response: Flask response
+        """
+        self.assert_status(response, 200)
+
+    def assert201(self, response):
+        """
+        Checks if response status code is 201
+
+        :param response: Flask response
+        """
+        self.assert_status(response, 201)
+
+    def assert204(self, response):
+        """
+        Checks if response status code is 204
+
+        :param response: Flask response
+        """
+        self.assert_status(response, 204)
+
+    def assert400(self, response):
+        """
+        Checks if response status code is 400
+
+        :param response: Flask response
+        """
+        self.assert_status(response, 400)
+
+    def assert401(self, response):
+        """
+        Checks if response status code is 401
+
+        :param response: Flask response
+        """
+        self.assert_status(response, 401)
+
+    def assert403(self, response):
+        """
+        Checks if response status code is 403
+
+        :param response: Flask response
+        """
+
+        self.assert_status(response, 403)
+
+    def assert404(self, response):
+        """
+        Checks if response status code is 404
+
+        :param response: Flask response
+        """
+        self.assert_status(response, 404)
+
+    def assert405(self, response):
+        """
+        Checks if response status code is 405
+
+        :param response: Flask response
+        """
+        self.assert_status(response, 405)
 
 
 class JsonResponseMixin(object):
@@ -105,3 +297,18 @@ def _make_test_response(response_class):
         pass
 
     return TestResponse
+
+
+@contextmanager
+def requires_login():
+    user_unauthorized_signals = []
+
+    def _on(sender):
+        user_unauthorized_signals.append(sender)
+
+    user_unauthorized.connect(_on)
+    try:
+        yield
+    finally:
+        user_unauthorized.disconnect(_on)
+        assert user_unauthorized_signals, "The view does not require login."

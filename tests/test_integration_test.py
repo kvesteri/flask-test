@@ -1,9 +1,9 @@
 from flask import Flask
-from flask_test import IntegrationTestCase
+from flask_test import TestCase
 from tests import TagAPI
 
 
-class TestIntegrationTest(IntegrationTestCase):
+class TestIntegrationTest(TestCase):
     setup_level = 'class'
 
     @classmethod
