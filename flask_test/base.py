@@ -35,11 +35,13 @@ class BaseTestCase(object):
     def before_setup(self, method=None):
         """Simple template method that is invoked before setup_class or
         setup_method are called."""
+        pass
 
     @classmethod
     def after_setup(self, method=None):
         """Simple template method that is invoked after setup_class or
         setup_method are called."""
+        pass
 
     @classmethod
     def setup_class(cls):
