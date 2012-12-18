@@ -1,4 +1,3 @@
-from sqlalchemy import event
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import Executable, ClauseElement
 
@@ -37,9 +36,3 @@ class DatabaseSetup(object):
                 self.delete_tables(db)
             db.session.close_all()
             db.engine.dispose()
-            self.clear_sqlalchemy_event_listeners()
-
-    def clear_sqlalchemy_event_listeners(self):
-        for key, items in event._registrars.items():
-            for item in items:
-                item.dispatch._clear()
