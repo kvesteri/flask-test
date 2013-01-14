@@ -29,7 +29,7 @@ class TestCase(object):
     view = None
     url = None
     setup_level = 'method'
-    setup_delegators = [ApplicationSetup(), DatabaseSetup(), ViewSetup()]
+    setup_delegators = [ApplicationSetup(), ViewSetup(), DatabaseSetup()]
 
     @property
     def db(self):

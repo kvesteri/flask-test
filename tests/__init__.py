@@ -1,4 +1,5 @@
 from flask import abort, Flask, jsonify, Response, request
+from flask.ext.login import login_required
 from flask.views import MethodView
 from flask_test import TestCase
 
@@ -44,6 +45,7 @@ class TagAPI(MethodView):
         self.tag_counter += 1
         return response
 
+    @login_required
     def delete(self, tag_id):
         self.fetch_tag(tag_id)
         del self.tags[tag_id]
