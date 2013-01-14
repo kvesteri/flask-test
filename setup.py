@@ -18,7 +18,7 @@ class PyTest(Command):
 
 setup(
     name='Flask-Test',
-    version='0.1.0',
+    version='0.1',
     url='http://github.com/kvesteri/flask-test',
     license='MIT',
     author='Konsta Vesterinen',
@@ -33,6 +33,7 @@ setup(
     platforms='any',
     install_requires=[
         'Flask>=0.7',
+        'SQLAlchemy==0.7.8'
     ],
     cmdclass={'test': PyTest},
     classifiers=[
