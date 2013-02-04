@@ -24,9 +24,7 @@ setup(
     author='Konsta Vesterinen',
     author_email='konsta.vesterinen@gmail.com',
     description='Various unit testing helpers for Flask applications.',
-    long_description=
-        open('README.rst').read() + '\n\n' +
-        open('CHANGES.rst').read(),
+    long_description='Various unit testing helpers for Flask applications.',
     packages=['flask_test'],
     include_package_data=True,
     zip_safe=False,
