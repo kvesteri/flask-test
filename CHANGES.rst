@@ -3,6 +3,12 @@ Changelog
 
 Here you can see the full list of changes between each Flask-Test release.
 
+0.1.2 (4.2.2013)
+^^^^^^^^^^^^^^^^
+
+- Fixed MANIFEST.in
+
+
 0.1.1 (4.2.2013)
 ^^^^^^^^^^^^^^^^
 
