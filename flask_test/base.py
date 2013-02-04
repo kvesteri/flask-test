@@ -279,6 +279,21 @@ class TestCase(object):
         """
         self.assert_status(response, 405)
 
+    def assert_flash_message(self, expected_category, expected_message):
+        """
+        Checks that given flash message was added in given category
+
+        :param expected_category: Flash message category string
+        :param expected_message: message that should have been added to the
+            flash messages stack
+        """
+        with self.client.session_transaction() as session:
+            messages = session['_flashes']
+            assert len(messages) == 1
+            category, message = messages[0]
+            assert category == expected_category
+            assert message == expected_message
+
 
 class JsonResponseMixin(object):
     """
