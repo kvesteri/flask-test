@@ -1,6 +1,8 @@
-from flask import json, url_for
 from contextlib import contextmanager
+
+from flask import json, url_for
 from flask.ext.login import user_unauthorized
+from flexmock import flexmock
 
 from werkzeug import cached_property
 from .view import ViewSetup
@@ -329,3 +331,9 @@ def requires_login():
     finally:
         user_unauthorized.disconnect(_on)
         assert user_unauthorized_signals, "The view does not require login."
+
+
+@contextmanager
+def validates_form(form):
+    flexmock(form).should_receive('validate').once()
+    yield
