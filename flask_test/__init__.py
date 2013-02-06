@@ -1,4 +1,10 @@
-from .base import ApplicationSetup, TestCase, JsonResponseMixin, requires_login
+from .base import (
+    ApplicationSetup,
+    JsonResponseMixin,
+    requires_login,
+    TestCase,
+    validates_form,
+)
 from database import DatabaseSetup
 from .view import ViewSetup
 
@@ -9,5 +15,6 @@ __all__ = (
     JsonResponseMixin,
     requires_login,
     TestCase,
+    validates_form,
     ViewSetup,
 )
