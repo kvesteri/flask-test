@@ -3,6 +3,13 @@ Changelog
 
 Here you can see the full list of changes between each Flask-Test release.
 
+
+0.1.3 (16.2.2013)
+^^^^^^^^^^^^^^^^^
+
+- Added API documentation
+
+
 0.1.2 (4.2.2013)
 ^^^^^^^^^^^^^^^^
 
