@@ -26,6 +26,9 @@ class ApplicationSetup(object):
 
 
 class TestCase(object):
+    """
+    Base TestCase, all your Flask test cases should inherit this class
+    """
     teardown_delete_data = True
     template = None
     view = None
@@ -93,6 +96,9 @@ class TestCase(object):
 
     @classmethod
     def setup_class(cls):
+        """
+        Setup this test case when using class level setup
+        """
         if cls.setup_level == 'class':
             cls.before_class_setup()
             app = cls.create_app()
@@ -102,6 +108,9 @@ class TestCase(object):
 
     @classmethod
     def teardown_class(cls):
+        """
+        Teardown this test case when using class level setup
+        """
         if cls.setup_level == 'class':
             cls.before_class_teardown()
             for setup_delegator in reversed(cls.setup_delegators):
@@ -109,6 +118,9 @@ class TestCase(object):
             cls.after_class_teardown()
 
     def setup_method(self, method):
+        """
+        Setup this test case when using method level setup
+        """
         if self.setup_level == 'method':
             self.before_method_setup(method)
             app = self.create_app()
@@ -117,6 +129,9 @@ class TestCase(object):
             self.after_method_setup(method)
 
     def teardown_method(self, method):
+        """
+        Teardown this test case when using method level setup
+        """
         if self.setup_level == 'method':
             self.before_method_teardown(method)
             for setup_delegator in reversed(self.setup_delegators):

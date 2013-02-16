@@ -2,10 +2,17 @@ Flask-Test
 ==========
 
 
-Indices and tables
-==================
+API Documentation
+-----------------
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. module:: flask_test
+.. autoclass:: TestCase
+    :members:
 
+.. include:: ../CHANGES.rst
+
+
+License
+-------
+
+.. include:: ../LICENSE
