@@ -22,6 +22,7 @@ class ApplicationSetup(object):
 
     def teardown(self, obj):
         obj._app_context.pop()
+        obj._app_context = None
         obj.app = None
 
 
