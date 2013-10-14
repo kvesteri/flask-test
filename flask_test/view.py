@@ -1,4 +1,4 @@
-from flask import json, template_rendered
+from flask import json, template_rendered, _request_ctx_stack
 
 
 class ViewSetup(object):
@@ -14,6 +14,8 @@ class ViewSetup(object):
     def teardown(self, obj):
         obj.client = None
         obj.xhr_client = None
+        if _request_ctx_stack.top and _request_ctx_stack.top.preserved:
+            _request_ctx_stack.top.pop()
         obj._ctx.pop()
         obj._ctx = None
         template_rendered.disconnect(obj._add_template)

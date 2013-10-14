@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 
-from flask import json, url_for, _request_ctx_stack
+from flask import json, url_for
 from flask.ext.login import user_unauthorized
 from flexmock import flexmock
 
@@ -21,8 +21,6 @@ class ApplicationSetup(object):
         obj._app_context.push()
 
     def teardown(self, obj):
-        if _request_ctx_stack.top and _request_ctx_stack.top.preserved:
-            _request_ctx_stack.top.pop()
         obj._app_context.pop()
         obj._app_context = None
         obj.app = None
