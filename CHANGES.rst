@@ -4,6 +4,12 @@ Changelog
 Here you can see the full list of changes between each Flask-Test release.
 
 
+0.1.4 (14.10.2013)
+^^^^^^^^^^^^^^^^^
+
+- Handled 'Popped wrong request context' error
+
+
 0.1.3 (16.2.2013)
 ^^^^^^^^^^^^^^^^^
 
