@@ -31,7 +31,7 @@ setup(
     platforms='any',
     install_requires=[
         'Flask>=0.7',
-        'SQLAlchemy==0.7.8'
+        'SQLAlchemy>=0.7.8'
     ],
     cmdclass={'test': PyTest},
     classifiers=[
