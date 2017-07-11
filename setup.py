@@ -18,7 +18,7 @@ class PyTest(Command):
 
 setup(
     name='Flask-Test',
-    version='0.1.5',
+    version='0.1.6',
     url='http://github.com/kvesteri/flask-test',
     license='MIT',
     author='Konsta Vesterinen',
